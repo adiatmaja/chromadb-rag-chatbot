@@ -1,12 +1,12 @@
 sku,product_name,stock_quantity,unit,warehouse_location,last_updated
-ND001,Noodle Instant Original Flavor,250,box,WH-A01,2025-01-15
-ND002,Noodle Instant Fried Original,180,box,WH-A02,2025-01-15
-ML001,Sweetened Condensed Milk White,120,carton,WH-B01,2025-01-15
-ML002,Sweetened Condensed Milk Chocolate,95,carton,WH-B02,2025-01-15
-TB001,Ready-to-Drink Tea Original,200,carton,WH-C01,2025-01-15
-SC001,Chili Sauce Extra Spicy,75,box,WH-C02,2025-01-15
-SS001,Sweet Soy Sauce Large Bottle,60,box,WH-D01,2025-01-15
-SB001,Liquid Bath Soap Red,110,box,WH-D02,2025-01-15
-KP001,Instant Coffee Mix Sachet,300,strip,WH-E01,2025-01-15
-RS001,Cooking Oil Premium Refill,85,box,WH-E02,2025-01-15
-WT001,Mineral Water 600ml,500,carton,WH-F01,2025-01-15
+IMG001,Indomie Mi Goreng Original,320,dus,WH-A01,2025-01-15
+IMA002,Indomie Mi Instan Rasa Ayam Bawang,280,dus,WH-A02,2025-01-15
+MSG003,Mie Sedaap Goreng Original,150,dus,WH-A03,2025-01-15
+LMN004,Le Minerale Air Mineral 600ml,400,karton,WH-B01,2025-01-15
+AQA005,Aqua Air Mineral 600ml,380,karton,WH-B02,2025-01-15
+TBS006,Teh Botol Sosro Original,200,karton,WH-C01,2025-01-15
+KKA007,Kopi Kapal Api Special Mix Sachet,500,renteng,WH-C02,2025-01-15
+GGS008,Gula Pasir Rose Brand 1kg,180,karton,WH-D01,2025-01-15
+SKM009,Susu Kental Manis Frisian Flag Cokelat,120,karton,WH-D02,2025-01-15
+PSS010,Pocari Sweat 500ml,160,karton,WH-E01,2025-01-15
+SBR011,Sabun Mandi Cair Lifebuoy Total 10 Protect Merah,90,dus,WH-E02,2025-01-15
