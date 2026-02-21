@@ -69,8 +69,8 @@ UnifiedRetriever (src/core/retriever.py)
 UnifiedRAGOrchestrator (src/core/orchestrator.py)
     │  builds LLM context, calls OpenAI-compatible API (LM Studio / any provider)
     │
-    ├── if PRODUCT → get_product_candidates(query, n=3)
-    │       │  fetches top 3 products, formats numbered list for LLM reranking
+    ├── if PRODUCT → get_product_candidates(query, n=5)
+    │       │  fetches top 5 products, formats numbered list for LLM reranking
     │       │  LLM selects the most relevant product from candidates
     │       │
     │       └── if explicit quantity → function call: check_inventory(sku, qty)
@@ -86,7 +86,7 @@ UnifiedRAGOrchestrator (src/core/orchestrator.py)
 
 **Key design choices:**
 - **ChromaDB collection names**: `fmcg_products` (from `COLLECTION_NAME` env var), `faq_collection` and `intent_collection` are hardcoded constants in `retriever.py` — not env vars.
-- **Product reranking**: For PRODUCT matches, `get_product_candidates()` runs a second embedding lookup to fetch the top 3 products, which are sent to the LLM as a numbered list. The LLM selects the correct product — this handles cases where embedding similarity alone picks the wrong variant (e.g., "indomie goreng" vs "indomie ayam bawang"). This means two embedding calls per product query.
+- **Product reranking**: For PRODUCT matches, `get_product_candidates()` runs a second embedding lookup to fetch the top 5 products, which are sent to the LLM as a numbered list. The LLM selects the correct product — this handles cases where embedding similarity alone picks the wrong variant (e.g., "indomie goreng" vs "indomie ayam bawang"). n=5 (not 3) is intentional: the `paraphrase-multilingual-MiniLM-L12-v2` model places semantically similar Indonesian products close together, so the correct product may sit at rank 3–5. This means two embedding calls per product query.
 - **Stock data**: Read directly from `data/stock_data.csv` via `StockReader`. Schema requires: `sku`, `product_name`, `warehouse_id`, `warehouse_name`, `location`, `quantity`, `reserved_quantity`, `reorder_level`. Supports multiple rows per SKU (multi-warehouse). The `src/api/inventory_api.py` is a legacy FastAPI module not used in the current flow.
 - **Cosine distance**: All ChromaDB collections must be created with `metadata={"hnsw:space": "cosine"}`. Default L2 distance makes `relevance_score = 1 - distance` always return 0 for typical embedding distances.
 - **Order tracking**: `OrderTracker` persists orders to `database/orders.json` as a flat list of `OrderData` dataclasses.
