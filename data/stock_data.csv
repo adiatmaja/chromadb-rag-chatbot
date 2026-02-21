@@ -1,12 +1,26 @@
-sku,product_name,stock_quantity,unit,warehouse_location,last_updated
-IMG001,Indomie Mi Goreng Original,320,dus,WH-A01,2025-01-15
-IMA002,Indomie Mi Instan Rasa Ayam Bawang,280,dus,WH-A02,2025-01-15
-MSG003,Mie Sedaap Goreng Original,150,dus,WH-A03,2025-01-15
-LMN004,Le Minerale Air Mineral 600ml,400,karton,WH-B01,2025-01-15
-AQA005,Aqua Air Mineral 600ml,380,karton,WH-B02,2025-01-15
-TBS006,Teh Botol Sosro Original,200,karton,WH-C01,2025-01-15
-KKA007,Kopi Kapal Api Special Mix Sachet,500,renteng,WH-C02,2025-01-15
-GGS008,Gula Pasir Rose Brand 1kg,180,karton,WH-D01,2025-01-15
-SKM009,Susu Kental Manis Frisian Flag Cokelat,120,karton,WH-D02,2025-01-15
-PSS010,Pocari Sweat 500ml,160,karton,WH-E01,2025-01-15
-SBR011,Sabun Mandi Cair Lifebuoy Total 10 Protect Merah,90,dus,WH-E02,2025-01-15
+sku,product_name,warehouse_id,warehouse_name,location,quantity,reserved_quantity,reorder_level
+IMG001,Indomie Mi Goreng Original,WH001,Gudang Jakarta Pusat,Jakarta Pusat,180,20,50
+IMG001,Indomie Mi Goreng Original,WH002,Gudang Tangerang,Tangerang Selatan,120,15,30
+IMG001,Indomie Mi Goreng Original,WH003,Gudang Bekasi,Bekasi Barat,80,10,30
+IMA002,Indomie Mi Instan Rasa Ayam Bawang,WH001,Gudang Jakarta Pusat,Jakarta Pusat,160,25,50
+IMA002,Indomie Mi Instan Rasa Ayam Bawang,WH002,Gudang Tangerang,Tangerang Selatan,90,10,30
+IMA002,Indomie Mi Instan Rasa Ayam Bawang,WH003,Gudang Bekasi,Bekasi Barat,50,5,20
+MSG003,Mie Sedaap Goreng Original,WH001,Gudang Jakarta Pusat,Jakarta Pusat,100,10,30
+MSG003,Mie Sedaap Goreng Original,WH003,Gudang Bekasi,Bekasi Barat,65,5,20
+LMN004,Le Minerale Air Mineral 600ml,WH001,Gudang Jakarta Pusat,Jakarta Pusat,200,30,80
+LMN004,Le Minerale Air Mineral 600ml,WH002,Gudang Tangerang,Tangerang Selatan,150,20,60
+LMN004,Le Minerale Air Mineral 600ml,WH004,Gudang Surabaya,Surabaya Timur,90,10,40
+AQA005,Aqua Air Mineral 600ml,WH001,Gudang Jakarta Pusat,Jakarta Pusat,180,25,80
+AQA005,Aqua Air Mineral 600ml,WH004,Gudang Surabaya,Surabaya Timur,120,15,50
+TBS006,Teh Botol Sosro Original,WH001,Gudang Jakarta Pusat,Jakarta Pusat,110,15,40
+TBS006,Teh Botol Sosro Original,WH002,Gudang Tangerang,Tangerang Selatan,70,10,30
+KKA007,Kopi Kapal Api Special Mix Sachet,WH001,Gudang Jakarta Pusat,Jakarta Pusat,300,40,100
+KKA007,Kopi Kapal Api Special Mix Sachet,WH003,Gudang Bekasi,Bekasi Barat,200,30,80
+GGS008,Gula Pasir Rose Brand 1kg,WH001,Gudang Jakarta Pusat,Jakarta Pusat,90,10,30
+GGS008,Gula Pasir Rose Brand 1kg,WH002,Gudang Tangerang,Tangerang Selatan,60,5,20
+SKM009,Susu Kental Manis Frisian Flag Cokelat,WH001,Gudang Jakarta Pusat,Jakarta Pusat,70,10,25
+SKM009,Susu Kental Manis Frisian Flag Cokelat,WH004,Gudang Surabaya,Surabaya Timur,50,5,20
+PSS010,Pocari Sweat 500ml,WH001,Gudang Jakarta Pusat,Jakarta Pusat,100,15,40
+PSS010,Pocari Sweat 500ml,WH002,Gudang Tangerang,Tangerang Selatan,60,10,25
+SBR011,Sabun Mandi Cair Lifebuoy Total 10 Protect Merah,WH001,Gudang Jakarta Pusat,Jakarta Pusat,55,5,20
+SBR011,Sabun Mandi Cair Lifebuoy Total 10 Protect Merah,WH003,Gudang Bekasi,Bekasi Barat,35,0,15
