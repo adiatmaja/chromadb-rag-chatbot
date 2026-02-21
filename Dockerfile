@@ -67,10 +67,10 @@ ENV PYTHONUNBUFFERED=1 \
     ST_DISABLE_ONNX=1 \
     # Default LLM configuration (can be overridden)
     LLM_BASE_URL=http://localhost:1234/v1 \
-    LLM_MODEL_NAME=gemma-2b-it \
+    LLM_MODEL_NAME=qwen2.5-7b-instruct \
     LLM_API_KEY=lm-studio \
     # Embedding configuration
-    EMBEDDING_MODEL_NAME=all-MiniLM-L6-v2 \
+    EMBEDDING_MODEL_NAME=paraphrase-multilingual-MiniLM-L12-v2 \
     # Vector DB configuration
     COLLECTION_NAME=fmcg_products \
     FAQ_COLLECTION_NAME=faq_collection \

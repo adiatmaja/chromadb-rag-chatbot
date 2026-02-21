@@ -28,13 +28,13 @@ services:
     environment:
       # LLM Configuration
       - LLM_BASE_URL=${LLM_BASE_URL:-http://host.docker.internal:1234/v1}
-      - LLM_MODEL_NAME=${LLM_MODEL_NAME:-gemma-2b-it}
+      - LLM_MODEL_NAME=${LLM_MODEL_NAME:-qwen2.5-7b-instruct}
       - LLM_API_KEY=${LLM_API_KEY:-lm-studio}
       - LLM_TEMPERATURE=${LLM_TEMPERATURE:-0.0}
       - LLM_MAX_TOKENS=${LLM_MAX_TOKENS:-1000}
 
       # Embedding Model
-      - EMBEDDING_MODEL_NAME=${EMBEDDING_MODEL_NAME:-all-MiniLM-L6-v2}
+      - EMBEDDING_MODEL_NAME=${EMBEDDING_MODEL_NAME:-paraphrase-multilingual-MiniLM-L12-v2}
 
       # Vector Database Collections
       - COLLECTION_NAME=${COLLECTION_NAME:-fmcg_products}
