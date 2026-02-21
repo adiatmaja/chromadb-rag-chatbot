@@ -48,7 +48,7 @@ backed by ChromaDB.
   │  UnifiedRAGOrchestrator  (src/core/orchestrator.py)      │
   │                                                           │
   │  if PRODUCT match:                                        │
-  │    get_product_candidates(query, n=3)                     │
+  │    get_product_candidates(query, n=5)                     │
   │    → numbered list of candidates sent to LLM             │
   │    → LLM selects most relevant product (reranking)       │
   │                                                           │
@@ -69,7 +69,7 @@ backed by ChromaDB.
 ## Features
 
 - **Semantic Product Search** — understands colloquial and regional product names (e.g. "indomie kuning" → Indomie Mi Instan Rasa Ayam Bawang)
-- **LLM Reranking** — top 3 product candidates sent to LLM for selection, avoiding embedding model precision issues between similar products
+- **LLM Reranking** — top 5 product candidates sent to LLM for selection, avoiding embedding model precision issues between similar products
 - **Intent Classification** — 18+ e-commerce intent types (cart ops, checkout, product inquiry, greetings)
 - **FAQ Retrieval** — vectorized FAQ queried semantically; supports ClickHouse (production) or CSV (demo)
 - **Unified Search** — single interface across all three knowledge bases, returns best match
@@ -212,8 +212,8 @@ print(f"Product: {result.metadata['official_name']}")
 print(f"SKU: {result.metadata['sku']}")
 print(f"Confidence: {result.relevance_score:.2%}")
 
-# Get top 3 product candidates for LLM reranking
-candidates = retriever.get_product_candidates("indomie goreng", n=3)
+# Get top 5 product candidates for LLM reranking
+candidates = retriever.get_product_candidates("indomie goreng", n=5)
 for c in candidates:
     print(f"  {c.metadata['sku']}: {c.metadata['official_name']} ({c.relevance_score:.2%})")
 
@@ -231,8 +231,10 @@ print(response)
 
 **LLM reranking for product disambiguation** — Embedding similarity alone cannot reliably
 distinguish similar products (e.g. "indomie goreng" vs "indomie ayam bawang"). The retriever
-fetches the top 3 candidates and the LLM selects the correct one from a numbered list. This
-costs one extra embedding call per product query.
+fetches the top 5 candidates and the LLM selects the correct one from a numbered list. n=5
+(not 3) is intentional: `paraphrase-multilingual-MiniLM-L12-v2` places semantically similar
+Indonesian products close together in embedding space, so the correct product can sit at rank
+3–5. This costs one extra embedding call per product query.
 
 **Cosine distance required** — All ChromaDB collections must be created with
 `metadata={"hnsw:space": "cosine"}`. The default L2 metric produces distances > 1,
