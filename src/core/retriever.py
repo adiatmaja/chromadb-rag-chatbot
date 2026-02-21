@@ -332,6 +332,37 @@ class UnifiedRetriever:
 
         return all_results
 
+    def get_product_candidates(
+            self,
+            query: str,
+            n: int = 3
+    ) -> List[SearchResult]:
+        """
+        Returns top N product candidates for a query.
+
+        Used by the orchestrator to provide multiple candidates to the LLM
+        for reranking, improving precision when products are semantically similar.
+
+        Args:
+            query (str): User's search query
+            n (int): Number of candidates to return
+
+        Returns:
+            List[SearchResult]: Top N products sorted by relevance score
+        """
+        if not self.has_products:
+            return []
+
+        query_embedding = self.embedding_model.encode([query]).tolist()
+        candidates = self._search_collection(
+            self.product_collection,
+            query_embedding,
+            ContentType.PRODUCT,
+            min(n, self.product_collection.count())
+        )
+        candidates.sort(key=lambda r: r.relevance_score, reverse=True)
+        return candidates
+
     def _search_collection(
             self,
             collection: chromadb.Collection,
