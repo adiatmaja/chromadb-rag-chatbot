@@ -175,7 +175,7 @@ class UnifiedRAGOrchestrator:
         console.print("\n[bold cyan]Step 2: Building Context for LLM[/bold cyan]")
         product_candidates = None
         if search_result.content_type == ContentType.PRODUCT:
-            product_candidates = self.retriever.get_product_candidates(user_query, n=3)
+            product_candidates = self.retriever.get_product_candidates(user_query, n=5)
             console.print(
                 f"[dim]Retrieved {len(product_candidates)} product candidates for reranking[/dim]"
             )
