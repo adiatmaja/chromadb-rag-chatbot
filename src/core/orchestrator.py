@@ -173,7 +173,15 @@ class UnifiedRAGOrchestrator:
 
         # Step 2: CONTEXT BUILDING
         console.print("\n[bold cyan]Step 2: Building Context for LLM[/bold cyan]")
-        context_string, content_type_str = self._build_context_string(search_result)
+        product_candidates = None
+        if search_result.content_type == ContentType.PRODUCT:
+            product_candidates = self.retriever.get_product_candidates(user_query, n=3)
+            console.print(
+                f"[dim]Retrieved {len(product_candidates)} product candidates for reranking[/dim]"
+            )
+        context_string, content_type_str = self._build_context_string(
+            search_result, product_candidates
+        )
         console.print(f"[dim]Content Type: {content_type_str}[/dim]")
         console.print(f"[dim]Context: {context_string[:200]}...[/dim]")
 
