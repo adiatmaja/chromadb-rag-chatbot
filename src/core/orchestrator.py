@@ -183,29 +183,56 @@ class UnifiedRAGOrchestrator:
 
         return response
 
-    def _build_context_string(self, search_result: SearchResult) -> tuple[str, str]:
+    def _build_context_string(
+        self,
+        search_result: SearchResult,
+        product_candidates: List[SearchResult] | None = None,
+    ) -> tuple[str, str]:
         """
         Formats search result into context string for LLM.
 
+        When product_candidates is provided (multiple products), formats them
+        as a numbered list so the LLM can select the most relevant one.
+
         Args:
-            search_result (SearchResult): Result from unified search
+            search_result (SearchResult): Best result from unified search
+            product_candidates (List[SearchResult] | None): Top N product candidates
+                for reranking. If None, falls back to single-product format.
 
         Returns:
             tuple: (context_string, content_type_string)
         """
-        metadata = search_result.metadata
         content_type = search_result.content_type
 
         if content_type == ContentType.PRODUCT:
-            context = (
-                f"SKU: {metadata.get('sku', 'N/A')}, "
-                f"Nama Resmi: {metadata.get('official_name', 'N/A')}, "
-                f"Kuantitas Dus: {metadata.get('pack_size_desc', 'N/A')}, "
-                f"Sinonim: {metadata.get('colloquial_names', 'N/A')}"
-            )
+            candidates = product_candidates or [search_result]
+            if len(candidates) == 1:
+                m = candidates[0].metadata
+                context = (
+                    f"SKU: {m.get('sku', 'N/A')}, "
+                    f"Nama Resmi: {m.get('official_name', 'N/A')}, "
+                    f"Kuantitas Dus: {m.get('pack_size_desc', 'N/A')}, "
+                    f"Sinonim: {m.get('colloquial_names', 'N/A')}"
+                )
+            else:
+                lines = ["Beberapa kandidat produk yang mungkin sesuai:"]
+                for i, candidate in enumerate(candidates, 1):
+                    m = candidate.metadata
+                    lines.append(
+                        f"{i}. SKU: {m.get('sku', 'N/A')} | "
+                        f"Nama: {m.get('official_name', 'N/A')} | "
+                        f"Alias: {m.get('colloquial_names', 'N/A')} | "
+                        f"Kemasan: {m.get('pack_size_desc', 'N/A')}"
+                    )
+                lines.append(
+                    "\nPilih produk yang PALING SESUAI dengan pertanyaan pengguna. "
+                    "Gunakan SKU dari produk terpilih jika perlu check_inventory."
+                )
+                context = "\n".join(lines)
             return context, "PRODUK"
 
         elif content_type == ContentType.FAQ:
+            metadata = search_result.metadata
             context = (
                 f"Pertanyaan: {metadata.get('question', 'N/A')}\n"
                 f"Jawaban: {metadata.get('answer', 'N/A')}"
