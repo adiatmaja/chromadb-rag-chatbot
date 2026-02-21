@@ -54,7 +54,6 @@ COPY scripts/ /app/scripts/
 COPY data/ /app/data/
 COPY .env.example /app/.env.example
 COPY README.md /app/
-COPY CLAUDE.md /app/
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
