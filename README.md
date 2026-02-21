@@ -227,6 +227,98 @@ print(response)
 
 ---
 
+## Retrieval Test
+
+A comprehensive test covers all 11 products, 15 FAQs, and 18 intents.
+
+```bash
+PYTHONIOENCODING=utf-8 docker exec rag-product-search \
+  python scripts/testing/test_all_retrieval.py
+```
+
+**Sample output:**
+
+```
+══════════════════════════════════════════════════════════════════════
+  COMPREHENSIVE RETRIEVAL TEST
+  Products=11  FAQs=15  Intents=18
+══════════════════════════════════════════════════════════════════════
+
+══════════════════════════════════════════════════════════════════════
+  PRODUCT RETRIEVAL  (target SKU must appear in top-5 candidates)
+══════════════════════════════════════════════════════════════════════
+  [PASS]  Indomie Mi Goreng Original             query='indomie goreng'          rank #1  top_score=0.601
+  [PASS]  Indomie Mi Instan Ayam Bawang          query='indomie kuah'            rank #1  top_score=0.486
+  [PASS]  Mie Sedaap Goreng Original             query='mie sedap goreng'        rank #2  top_score=0.459
+  [PASS]  Le Minerale Air Mineral 600ml          query='le mineral'              rank #1  top_score=0.518
+  [PASS]  Aqua Air Mineral 600ml                 query='air aqua'                rank #1  top_score=0.663
+  [PASS]  Teh Botol Sosro Original               query='teh botol'               rank #1  top_score=0.475
+  [PASS]  Kopi Kapal Api Special Mix             query='kapal api mix'           rank #1  top_score=0.430
+  [PASS]  Gula Pasir Rose Brand 1kg              query='gula rose brand'         rank #1  top_score=0.718
+  [PASS]  Susu Kental Manis Frisian Flag Cokelat query='susu bendera cokelat'    rank #1  top_score=0.615
+  [PASS]  Pocari Sweat 500ml                     query='pocari sweat'            rank #1  top_score=0.370
+  [PASS]  Sabun Mandi Cair Lifebuoy              query='sabun lifebuoy merah'    rank #1  top_score=0.500
+
+  Products: 11/11 passed
+
+══════════════════════════════════════════════════════════════════════
+  FAQ RETRIEVAL  (correct FAQ id must be top-1 result)
+══════════════════════════════════════════════════════════════════════
+  [PASS]  Cara pemesanan      query='cara melakukan pemesanan'          got_id=1   score=0.682
+  [PASS]  Minimum pemesanan   query='minimum order berapa'              got_id=2   score=0.626
+  [PASS]  Metode pembayaran   query='metode pembayaran yang tersedia'   got_id=3   score=0.732
+  [PASS]  Lama pengiriman     query='berapa hari pengiriman'            got_id=4   score=0.654
+  [PASS]  Biaya pengiriman    query='ongkos kirim gratis'               got_id=5   score=0.526
+  [PASS]  Cek stok produk     query='cara cek stok barang'              got_id=6   score=0.538
+  [PASS]  Negosiasi harga     query='harga bisa dinegosiasi'            got_id=7   score=0.749
+  [PASS]  Produk rusak        query='barang rusak saat diterima'        got_id=8   score=0.516
+  [PASS]  Produk non-katalog  query='pesan produk di luar katalog'      got_id=9   score=0.693
+  [PASS]  Mitra reseller      query='daftar jadi reseller'              got_id=10  score=0.478
+  [PASS]  Program loyalitas   query='program poin reward pelanggan'     got_id=11  score=0.724
+  [PASS]  Batalkan pesanan    query='cara batalkan pesanan'             got_id=12  score=0.682
+  [PASS]  Faktur/nota         query='minta faktur pembelian'            got_id=13  score=0.738
+  [PASS]  Produk terlaris     query='produk paling laris'               got_id=14  score=0.588
+  [PASS]  Kode promo          query='cara pakai kode promo'             got_id=15  score=0.709
+
+  FAQs: 15/15 passed
+
+══════════════════════════════════════════════════════════════════════
+  INTENT CLASSIFICATION  (correct intent must be top-1 result)
+══════════════════════════════════════════════════════════════════════
+  [PASS]  Tambah jumlah item   query='tambah 3 lagi ke keranjang'                        score=0.408
+  [PASS]  Tambah item ke cart  query='mau pesan 2 dus indomie goreng'                    score=0.272
+  [PASS]  Pesan tanpa item     query='mau tambah ke keranjang tapi belum pilih produknya' score=0.436
+  [PASS]  Apply promo code     query='pakai kode DISC20'                                 score=0.275
+  [PASS]  Pertanyaan umum      query='jam operasional toko berapa'                       score=0.593
+  [PASS]  Lihat katalog        query='tampilkan katalog produk'                          score=0.588
+  [PASS]  Tanya produk spesifik query='ada mie goreng tidak'                             score=0.177
+  [PASS]  Batal tambah item    query='tidak jadi beli, batalkan'                         score=0.343
+  [PASS]  Batal checkout       query='batalkan checkout'                                 score=0.683
+  [PASS]  Checkout             query='checkout sekarang'                                 score=0.667
+  [PASS]  Farewell             query='terima kasih sampai jumpa'                         score=0.570
+  [PASS]  Cek produk favorit   query='cek produk favorit saya'                           score=0.740
+  [PASS]  Greeting             query='halo selamat pagi'                                 score=0.539
+  [PASS]  Tidak pakai promo    query='tidak pakai promo'                                 score=0.565
+  [PASS]  Cek poin             query='berapa poin saya sekarang'                         score=0.293
+  [PASS]  Status prioritas     query='saya pelanggan prioritas bukan'                    score=0.477
+  [PASS]  Kurangi item         query='kurangi 1 dari keranjang'                          score=0.459
+  [PASS]  Lihat keranjang      query='lihat isi keranjang saya'                          score=0.270
+
+  Intents: 18/18 passed
+
+══════════════════════════════════════════════════════════════════════
+  SUMMARY
+──────────────────────────────────────────────────────────────────────
+  Products : 11/11
+  FAQs     : 15/15
+  Intents  : 18/18
+──────────────────────────────────────────────────────────────────────
+  TOTAL    : 44/44  (PASS)
+══════════════════════════════════════════════════════════════════════
+```
+
+---
+
 ## Key Design Decisions
 
 **LLM reranking for product disambiguation** — Embedding similarity alone cannot reliably
