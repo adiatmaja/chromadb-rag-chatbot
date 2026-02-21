@@ -161,7 +161,7 @@ def index_intent_data():
 
         collection = client.create_collection(
             name=INTENT_COLLECTION_NAME,
-            metadata={"description": "Intent embeddings for intent classification"}
+            metadata={"description": "Intent embeddings for intent classification", "hnsw:space": "cosine"}
         )
         console.print("[green]✅ Collection created[/green]")
 

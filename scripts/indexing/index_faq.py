@@ -138,7 +138,7 @@ def index_faq_data():
 
         collection = client.create_collection(
             name=FAQ_COLLECTION_NAME,
-            metadata={"description": "FAQ embeddings from ClickHouse"}
+            metadata={"description": "FAQ embeddings from ClickHouse", "hnsw:space": "cosine"}
         )
         console.print("[green]✅ Collection created[/green]")
 

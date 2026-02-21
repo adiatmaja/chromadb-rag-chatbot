@@ -106,7 +106,7 @@ def index_faq_csv():
             pass
         collection = client.create_collection(
             name=FAQ_COLLECTION_NAME,
-            metadata={"description": "FAQ embeddings from CSV"}
+            metadata={"description": "FAQ embeddings from CSV", "hnsw:space": "cosine"}
         )
         console.print("[green]✅ Collection created[/green]")
 

@@ -49,7 +49,7 @@ except:
 
 collection = client.create_collection(
     name=COLLECTION_NAME,
-    metadata={"description": "FMCG product catalog embeddings"}
+    metadata={"description": "FMCG product catalog embeddings", "hnsw:space": "cosine"}
 )
 print("Collection created")
 
