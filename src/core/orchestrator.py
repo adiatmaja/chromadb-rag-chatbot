@@ -197,7 +197,7 @@ class UnifiedRAGOrchestrator:
         Args:
             search_result (SearchResult): Best result from unified search
             product_candidates (List[SearchResult] | None): Top N product candidates
-                for reranking. If None, falls back to single-product format.
+                for reranking. If None or empty, falls back to single-product format.
 
         Returns:
             tuple: (context_string, content_type_string)
