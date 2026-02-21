@@ -42,4 +42,4 @@ logs/
 *.ipynb
 
 # Generated data
-data/intent_data.csv
+# (intent_data.csv is intentionally tracked — embedding_text column is hand-tuned)
