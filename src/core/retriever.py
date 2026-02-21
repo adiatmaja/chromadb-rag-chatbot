@@ -353,12 +353,16 @@ class UnifiedRetriever:
         if not self.has_products:
             return []
 
+        count = self.product_collection.count()
+        if count == 0:
+            return []
+
         query_embedding = self.embedding_model.encode([query]).tolist()
         candidates = self._search_collection(
             self.product_collection,
             query_embedding,
             ContentType.PRODUCT,
-            min(n, self.product_collection.count())
+            min(n, count)
         )
         candidates.sort(key=lambda r: r.relevance_score, reverse=True)
         return candidates
