@@ -1,0 +1,12 @@
+sku,product_name,stock_quantity,unit,warehouse_location,last_updated
+ND001,Noodle Instant Original Flavor,250,box,WH-A01,2025-01-15
+ND002,Noodle Instant Fried Original,180,box,WH-A02,2025-01-15
+ML001,Sweetened Condensed Milk White,120,carton,WH-B01,2025-01-15
+ML002,Sweetened Condensed Milk Chocolate,95,carton,WH-B02,2025-01-15
+TB001,Ready-to-Drink Tea Original,200,carton,WH-C01,2025-01-15
+SC001,Chili Sauce Extra Spicy,75,box,WH-C02,2025-01-15
+SS001,Sweet Soy Sauce Large Bottle,60,box,WH-D01,2025-01-15
+SB001,Liquid Bath Soap Red,110,box,WH-D02,2025-01-15
+KP001,Instant Coffee Mix Sachet,300,strip,WH-E01,2025-01-15
+RS001,Cooking Oil Premium Refill,85,box,WH-E02,2025-01-15
+WT001,Mineral Water 600ml,500,carton,WH-F01,2025-01-15

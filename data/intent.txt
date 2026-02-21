@@ -1,0 +1,106 @@
+** add_item_to_cart: Customer wants to add a specific product with a specified quantity to the cart.
+
+Examples:
+Customer Message: 'I want to order 2 boxes of noodles', intent: 'add_item_to_cart'
+Customer Message: 'Add 5 cartons of mineral water to my cart', intent: 'add_item_to_cart'
+Customer Message: 'I'd like 3 boxes of cooking oil', intent: 'add_item_to_cart'
+
+** add_item_to_cart_but_no_item_specified: Customer wants to add something to the cart but hasn't specified the product.
+
+Examples:
+Customer Message: 'I want to order something', intent: 'add_item_to_cart_but_no_item_specified'
+Customer Message: 'Can I add an item?', intent: 'add_item_to_cart_but_no_item_specified'
+
+** add_amount_of_item_in_cart: Customer wants to increase the quantity of an item already in the cart.
+
+Examples:
+Customer Message: 'Add 2 more boxes of noodles', intent: 'add_amount_of_item_in_cart'
+Customer Message: 'Make it 5 total', intent: 'add_amount_of_item_in_cart'
+
+** reduce_amount_of_item_in_cart: Customer wants to decrease the quantity of an item in the cart.
+
+Examples:
+Customer Message: 'Remove one box of milk', intent: 'reduce_amount_of_item_in_cart'
+Customer Message: 'Change to 2 cartons instead of 3', intent: 'reduce_amount_of_item_in_cart'
+
+** cancel_adding_item_to_cart: Customer decides not to add an item after all.
+
+Examples:
+Customer Message: 'Never mind, I don't want to order', intent: 'cancel_adding_item_to_cart'
+Customer Message: 'Cancel that, forget it', intent: 'cancel_adding_item_to_cart'
+
+** checkout: Customer is ready to proceed with payment and complete the order.
+
+Examples:
+Customer Message: 'Checkout now', intent: 'checkout'
+Customer Message: 'I want to pay', intent: 'checkout'
+Customer Message: 'Proceed to payment', intent: 'checkout'
+
+** cancel_checkout: Customer wants to cancel the checkout process.
+
+Examples:
+Customer Message: 'Cancel checkout', intent: 'cancel_checkout'
+Customer Message: 'Go back, I don't want to pay yet', intent: 'cancel_checkout'
+
+** view_cart: Customer wants to see the contents of their cart.
+
+Examples:
+Customer Message: 'What's in my cart?', intent: 'view_cart'
+Customer Message: 'Show my order list', intent: 'view_cart'
+Customer Message: 'How many items do I have?', intent: 'view_cart'
+
+** apply_promo_code: Customer wants to apply a promotional code to their order.
+
+Examples:
+Customer Message: 'I have a promo code: DISC20', intent: 'apply_promo_code'
+Customer Message: 'Apply coupon SALE10', intent: 'apply_promo_code'
+
+** not_applying_promo_code: Customer explicitly chooses not to use a promo code.
+
+Examples:
+Customer Message: 'No promo code', intent: 'not_applying_promo_code'
+Customer Message: 'Skip the coupon step', intent: 'not_applying_promo_code'
+
+** asking_priority_products: Customer asks to see the product catalog or available items.
+
+Examples:
+Customer Message: 'What products do you have?', intent: 'asking_priority_products'
+Customer Message: 'Show me your catalog', intent: 'asking_priority_products'
+
+** asking_specific_product: Customer asks about a specific product's details, price, or availability.
+
+Examples:
+Customer Message: 'Is noodle instant available?', intent: 'asking_specific_product'
+Customer Message: 'How much is the cooking oil?', intent: 'asking_specific_product'
+
+** question_about_customer_profile_priority: Customer asks about their priority/membership status.
+
+Examples:
+Customer Message: 'Am I a priority customer?', intent: 'question_about_customer_profile_priority'
+Customer Message: 'What's my membership level?', intent: 'question_about_customer_profile_priority'
+
+** question_about_customer_profile_points: Customer asks about their reward points balance.
+
+Examples:
+Customer Message: 'How many points do I have?', intent: 'question_about_customer_profile_points'
+Customer Message: 'Check my reward points', intent: 'question_about_customer_profile_points'
+
+** greeting_intent: Customer sends a greeting message.
+
+Examples:
+Customer Message: 'Hello', intent: 'greeting_intent'
+Customer Message: 'Good morning', intent: 'greeting_intent'
+Customer Message: 'Hi there', intent: 'greeting_intent'
+
+** farewell_intent: Customer sends a farewell or closing message.
+
+Examples:
+Customer Message: 'Thank you, goodbye', intent: 'farewell_intent'
+Customer Message: 'Bye!', intent: 'farewell_intent'
+Customer Message: 'Thanks, that's all', intent: 'farewell_intent'
+
+** asking_general_questions: Customer asks a general question not related to a specific product or cart action.
+
+Examples:
+Customer Message: 'What are your operating hours?', intent: 'asking_general_questions'
+Customer Message: 'How long does delivery take?', intent: 'asking_general_questions'

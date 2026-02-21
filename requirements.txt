@@ -1,0 +1,91 @@
+# =============================================================================
+# Core Dependencies for RAG Product Search & Intent Classification System
+# =============================================================================
+# NOTE: These versions have been tested together and are compatible.
+# Do not upgrade without testing compatibility.
+
+# Environment Variable Management
+python-dotenv==1.0.0
+
+# Data Processing
+pandas==2.0.0
+numpy==1.24.3  # Compatible with pandas 2.0.0 and sentence-transformers
+
+# Vector Database
+chromadb==0.5.0  # Upgraded from 0.4.0 to fix segmentation faults
+
+# Embedding Models
+sentence-transformers==2.7.0  # Compatible with torch 2.8.0 and chromadb 0.5.0
+torch==2.8.0  # Required by sentence-transformers (CPU version)
+
+# LLM Integration
+openai==1.58.1  # OpenAI-compatible client for LM Studio (fixed proxies compatibility issue)
+
+# Terminal UI and Formatting
+rich==13.0.0  # Do not upgrade to 14.x (conflicts with streamlit if used)
+
+# ClickHouse Client (for FAQ data fetching)
+clickhouse-connect==0.6.0
+
+# =============================================================================
+# Additional Core Dependencies
+# =============================================================================
+# These are explicitly listed to ensure version compatibility
+
+# Transformers library (required by sentence-transformers)
+transformers==4.57.1
+
+# Tokenizers (required by transformers)
+tokenizers==0.22.1
+
+# Hugging Face Hub (for model downloads)
+huggingface-hub==0.36.0
+
+# Progress bars
+tqdm==4.67.1
+
+# Scientific computing
+scipy==1.13.0
+scikit-learn==1.4.2
+
+# =============================================================================
+# ChromaDB Dependencies (auto-installed but listed for reference)
+# =============================================================================
+# These are installed automatically with chromadb==0.5.0:
+# - protobuf==6.33.0 (WARNING: incompatible with streamlit<1.34.0 and tensorflow<2.14.0)
+# - chroma-hnswlib==0.7.3
+# - opentelemetry-api>=1.2.0
+# - opentelemetry-sdk>=1.2.0
+# - opentelemetry-exporter-otlp-proto-grpc>=1.2.0
+# - grpcio>=1.58.0
+# - bcrypt>=4.0.1
+# - typer>=0.9.0
+# - PyYAML>=6.0.0
+
+# ONNX Runtime - REMOVED for Docker compatibility
+# NOTE: onnxruntime has executable stack issues in Docker containers
+# sentence-transformers will use PyTorch backend instead (already available via torch==2.8.0)
+# For Windows local development: pip install onnxruntime==1.16.3
+# onnxruntime==1.16.3
+
+# =============================================================================
+# Known Compatibility Issues
+# =============================================================================
+# 1. ChromaDB 1.3.4 causes segmentation faults on Windows with torch 2.8.0
+# 2. sentence-transformers 5.x is incompatible with torch 2.8.0
+# 3. protobuf 6.33.0 (from chromadb 0.5.0) conflicts with:
+#    - streamlit<1.34.0 (requires protobuf<5)
+#    - tensorflow-intel<2.14.0 (requires protobuf<5)
+# 4. If using streamlit or tensorflow, pin protobuf==3.20.3 manually after install
+# 5. onnxruntime 1.20+ has DLL loading issues on Windows (use 1.16.3)
+#    Error: "ImportError: DLL load failed while importing onnxruntime_pybind11_state"
+#
+# =============================================================================
+# Removed Dependencies (Previously Used for API)
+# =============================================================================
+# The following dependencies were removed as the system now reads stock data
+# directly from CSV instead of using a FastAPI server:
+# - fastapi==0.121.1 (web framework for API)
+# - uvicorn[standard]==0.38.0 (ASGI server)
+# - pydantic==2.12.4 (data validation)
+# - requests==2.31.0 (HTTP client for API calls)

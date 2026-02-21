@@ -1,0 +1,113 @@
+# =============================================================================
+# Docker Compose Configuration for RAG Product Search System
+# =============================================================================
+# This file defines the services, networks, and volumes for running the
+# RAG system in Docker containers.
+#
+# Usage:
+#   docker-compose up -d          # Start in background
+#   docker-compose up             # Start with logs
+#   docker-compose down           # Stop and remove containers
+#   docker-compose logs -f rag    # View logs
+#   docker-compose exec rag bash  # Access container shell
+
+services:
+  # Main RAG Application
+  rag:
+    container_name: rag-product-search
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rag-product-search:latest
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Environment variables
+    # Override these in .env file or pass them at runtime
+    environment:
+      # LLM Configuration
+      - LLM_BASE_URL=${LLM_BASE_URL:-http://host.docker.internal:1234/v1}
+      - LLM_MODEL_NAME=${LLM_MODEL_NAME:-gemma-2b-it}
+      - LLM_API_KEY=${LLM_API_KEY:-lm-studio}
+      - LLM_TEMPERATURE=${LLM_TEMPERATURE:-0.0}
+      - LLM_MAX_TOKENS=${LLM_MAX_TOKENS:-1000}
+
+      # Embedding Model
+      - EMBEDDING_MODEL_NAME=${EMBEDDING_MODEL_NAME:-all-MiniLM-L6-v2}
+
+      # Vector Database Collections
+      - COLLECTION_NAME=${COLLECTION_NAME:-fmcg_products}
+      - FAQ_COLLECTION_NAME=${FAQ_COLLECTION_NAME:-faq_collection}
+      - INTENT_COLLECTION_NAME=${INTENT_COLLECTION_NAME:-intent_collection}
+      - RETRIEVAL_TOP_K=${RETRIEVAL_TOP_K:-3}
+
+      # ClickHouse Configuration (optional)
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST:-}
+      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT:-}
+      - CLICKHOUSE_DB_NAME=${CLICKHOUSE_DB_NAME:-}
+
+      # Application Settings
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENABLE_RICH_CONSOLE=${ENABLE_RICH_CONSOLE:-true}
+
+      # Suppress ChromaDB telemetry warnings
+      - ANONYMIZED_TELEMETRY=False
+      - CHROMA_TELEMETRY_IMPL=
+
+    # Load environment from .env file
+    env_file:
+      - .env
+
+    # Volume mounts for data persistence
+    volumes:
+      # Vector database (persists indexed data)
+      - ./database:/app/database
+
+      # Data files (products, intents, stock data)
+      - ./data:/app/data
+
+      # Logs directory
+      - ./logs:/app/logs
+
+      # Optional: Mount .env for easy updates
+      - ./.env:/app/.env:ro
+
+    # Network configuration
+    # Use host.docker.internal to access services on host machine
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Interactive mode with TTY
+    stdin_open: true
+    tty: true
+
+    # Resource limits (optional - adjust based on your server)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "from src.config import get_configuration_summary; get_configuration_summary()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Named volumes for better management (optional)
+volumes:
+  rag_database:
+    driver: local
+  rag_logs:
+    driver: local
+
+# Networks (optional - for future expansion)
+networks:
+  default:
+    name: rag-network

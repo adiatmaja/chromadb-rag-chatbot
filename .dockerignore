@@ -1,0 +1,109 @@
+# =============================================================================
+# Docker Ignore File for RAG Product Search System
+# =============================================================================
+# Files and directories listed here will be excluded from the Docker build
+# context, reducing build time and image size.
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Docker files (don't include in build context)
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Documentation (already copied selectively)
+docs/
+*.md
+!README.md
+!CLAUDE.md
+
+# Test files and coverage
+tests/
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# Logs
+logs/
+*.log
+
+# Database files (will be mounted as volumes)
+database/chroma_db/*
+database/orders.json
+
+# Environment files (sensitive data)
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Package manager files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Example and demo output files
+examples/output/
+orders_export.*
+
+# Legacy/deprecated files
+src/api/
+inventory_api.py
+stock_api.py
+llm_unified.py
+unified_search.py
+order_tracker.py
+
+# Node modules (if any)
+node_modules/
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# Editor backup files
+*.bak
+*.swp
+*~
