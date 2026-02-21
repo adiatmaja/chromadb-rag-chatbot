@@ -16,9 +16,9 @@ Built as part of R&D work at Sigma Solusi Indonesia.
 ## Overview
 
 This system serves as the foundational chatbot layer for a B2B FMCG platform, enabling
-semantic product search across colloquial Indonesian and Javanese product names, FAQ retrieval
-from a ClickHouse database, and 35+ e-commerce intent classification — all unified through a
-single retrieval interface backed by ChromaDB.
+semantic product search across colloquial Indonesian and Javanese product names, FAQ retrieval,
+and 18+ e-commerce intent classification — all unified through a single retrieval interface
+backed by ChromaDB.
 
 ---
 
@@ -30,47 +30,54 @@ single retrieval interface backed by ChromaDB.
   └──────────────────────────┬───────────────────────────────┘
                              │
   ┌──────────────────────────▼───────────────────────────────┐
-  │  Unified Retriever                                       │
-  │  sentence-transformers (all-MiniLM-L6-v2) → embeddings  │
+  │  Unified Retriever  (src/core/retriever.py)              │
+  │  paraphrase-multilingual-MiniLM-L12-v2 → embeddings     │
   │  Parallel search across 3 ChromaDB collections          │
   └──────────┬─────────────────┬──────────────┬─────────────┘
              │                 │              │
              ▼                 ▼              ▼
        [Products]          [FAQs]        [Intents]
-       11+ SKUs           29+ entries    35 types
-       colloquial         ClickHouse     e-commerce
+       11+ SKUs           15+ entries    18+ types
+       colloquial         CSV / CH       e-commerce
        name mapping       sourced        actions
              │                 │              │
              └────────┬────────┴──────────────┘
                       │  best match by relevance_score
                       ▼
   ┌───────────────────────────────────────────────────────────┐
-  │  UnifiedRAGOrchestrator                                   │
-  │  • Context-aware LLM prompt building                     │
-  │  • OpenAI-compatible API (LM Studio / any provider)      │
-  │  • Function calling: check_inventory(sku, qty)           │
-  └───────────────────────────────────────────────────────────┘
-                      │
-                      ▼
-  ┌───────────────────────────────────────────────────────────┐
-  │  Response + Order Tracking                               │
-  │  • StockReader (CSV-based inventory check)               │
-  │  • OrderTracker (persistent JSON storage)                │
-  └───────────────────────────────────────────────────────────┘
+  │  UnifiedRAGOrchestrator  (src/core/orchestrator.py)      │
+  │                                                           │
+  │  if PRODUCT match:                                        │
+  │    get_product_candidates(query, n=3)                     │
+  │    → numbered list of candidates sent to LLM             │
+  │    → LLM selects most relevant product (reranking)       │
+  │                                                           │
+  │  if explicit quantity:                                    │
+  │    check_inventory(sku, qty)  ← function calling         │
+  │    StockReader reads data/stock_data.csv                 │
+  │    OrderTracker saves to database/orders.json            │
+  │                                                           │
+  │  OpenAI-compatible API (LM Studio / any provider)        │
+  └──────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+              Final response in Indonesian
 ```
 
 ---
 
 ## Features
 
-- **Semantic Product Search** — understands colloquial and regional product names (e.g. "indomie kuning" → Noodle Instant Original)
-- **Intent Classification** — 35+ e-commerce intent types (cart ops, checkout, product inquiry, greetings)
-- **FAQ Retrieval** — vectorized FAQ from ClickHouse, queried semantically
+- **Semantic Product Search** — understands colloquial and regional product names (e.g. "indomie kuning" → Indomie Mi Instan Rasa Ayam Bawang)
+- **LLM Reranking** — top 3 product candidates sent to LLM for selection, avoiding embedding model precision issues between similar products
+- **Intent Classification** — 18+ e-commerce intent types (cart ops, checkout, product inquiry, greetings)
+- **FAQ Retrieval** — vectorized FAQ queried semantically; supports ClickHouse (production) or CSV (demo)
 - **Unified Search** — single interface across all three knowledge bases, returns best match
 - **LLM Integration** — works with any OpenAI-compatible API (LM Studio, OpenAI, Ollama)
-- **Order Tracking** — automatic order capture via LLM function calling, persistent JSON storage
+- **Function Calling** — automatic inventory check via `check_inventory(sku, qty)` when user states a quantity
+- **Order Tracking** — automatic order capture with persistent JSON storage
 - **Docker-ready** — full Docker + Docker Compose deployment, no Python on host required
-- **Windows-compatible** — UTF-8 encoding fixes included throughout
+- **Windows-compatible** — UTF-8 encoding fixes and onnxruntime mock included
 
 ---
 
@@ -80,34 +87,34 @@ single retrieval interface backed by ChromaDB.
 chromadb-rag-chatbot/
 ├── src/
 │   ├── core/
-│   │   ├── retriever.py         # UnifiedRetriever — parallel search across collections
-│   │   ├── orchestrator.py      # UnifiedRAGOrchestrator — LLM context + function calling
+│   │   ├── retriever.py         # UnifiedRetriever — parallel search + get_product_candidates()
+│   │   ├── orchestrator.py      # UnifiedRAGOrchestrator — reranking, LLM, function calling
 │   │   └── order_tracker.py     # Persistent order tracking
 │   ├── utils/
-│   │   ├── clickhouse_client.py # ClickHouse FAQ data fetcher
+│   │   ├── clickhouse_client.py # ClickHouse FAQ data fetcher (production)
 │   │   └── stock_reader.py      # CSV-based stock level reader
 │   └── config.py                # Centralized config from .env
 │
 ├── scripts/
 │   ├── indexing/                # One-time data indexing scripts
-│   │   ├── index_products.py    # Product CSV → ChromaDB
-│   │   ├── index_intent.py      # Intent CSV → ChromaDB
-│   │   ├── index_faq.py         # ClickHouse FAQ → ChromaDB
-│   │   └── parse_intent_data.py # intent.txt → intent_data.csv
-│   ├── testing/                 # Verification scripts
-│   ├── demo/                    # Full workflow demos
-│   └── run_query.py             # Interactive query interface
+│   │   ├── index_products.py    # product_data.csv → ChromaDB
+│   │   ├── index_intent.py      # intent_data.csv → ChromaDB
+│   │   ├── index_faq_csv.py     # faq_data.csv → ChromaDB (no-ClickHouse)
+│   │   ├── index_faq.py         # ClickHouse FAQ → ChromaDB (production)
+│   │   ├── parse_intent_data.py # intent.txt → intent_data.csv
+│   │   └── verify_collections.py
+│   └── run_query.py             # Interactive query interface (requires TTY)
 │
 ├── data/                        # Sample data (replace with your own)
-│   ├── product_data.csv         # Product catalog
-│   ├── stock_data.csv           # Inventory stock levels
+│   ├── product_data.csv         # Product catalog with pre-computed embedding_text
+│   ├── stock_data.csv           # Inventory by warehouse (multi-warehouse schema)
+│   ├── faq_data.csv             # FAQ entries for demo mode
 │   └── intent.txt               # Intent definitions + examples
 │
-├── database/                    # ChromaDB persistent storage (git-ignored)
-├── examples/                    # Usage examples
-├── tests/                       # Unit tests
+├── database/                    # ChromaDB + order storage (git-ignored)
+├── deployment/                  # Docker deployment guides and helper scripts
 ├── docs/                        # Extended documentation
-├── deployment/                  # Docker deployment guides
+├── tests/                       # Integration tests (require live API server)
 ├── Dockerfile
 ├── docker-compose.yml
 └── .env.example
@@ -125,17 +132,19 @@ cd chromadb-rag-chatbot
 
 # Configure environment
 cp .env.example .env
-# Edit .env with your LLM URL and ClickHouse credentials
+# Edit .env: set LLM_BASE_URL and LLM_MODEL_NAME to match your LM Studio
 
 # Build and run
 docker-compose up -d
 
 # First-time: index all data
-docker-compose exec rag bash
-python scripts/indexing/parse_intent_data.py
-python scripts/indexing/index_intent.py
-python scripts/indexing/index_products.py
-exit
+docker-compose exec rag python scripts/indexing/parse_intent_data.py
+docker-compose exec rag python scripts/indexing/index_intent.py
+docker-compose exec rag python scripts/indexing/index_products.py
+docker-compose exec rag python scripts/indexing/index_faq_csv.py
+
+# Start interactive session (requires -it for TTY)
+docker-compose exec -it rag python scripts/run_query.py
 ```
 
 ### Local Development
@@ -143,12 +152,18 @@ exit
 ```bash
 # Python 3.9+ required
 pip install -r requirements.txt
+
+# Windows only — install after requirements.txt
+pip install onnxruntime==1.16.3
+
 cp .env.example .env
+# Edit .env with your LLM and embedding settings
 
 # Index data
 python scripts/indexing/parse_intent_data.py
 python scripts/indexing/index_intent.py
 python scripts/indexing/index_products.py
+python scripts/indexing/index_faq_csv.py
 
 # Run interactive query interface
 python scripts/run_query.py
@@ -163,22 +178,24 @@ All configuration lives in `.env` (copy from `.env.example`):
 ```env
 # LLM — any OpenAI-compatible endpoint
 LLM_BASE_URL=http://localhost:1234/v1
-LLM_MODEL_NAME=your-model-name
+LLM_MODEL_NAME=qwen2.5-7b-instruct
 LLM_API_KEY=lm-studio
 
-# Embeddings
-EMBEDDING_MODEL_NAME=all-MiniLM-L6-v2
+# Embeddings — multilingual model required for Indonesian/Javanese
+EMBEDDING_MODEL_NAME=paraphrase-multilingual-MiniLM-L12-v2
 
 # ChromaDB
 VECTOR_DB_PATH=database/chroma_db
 COLLECTION_NAME=fmcg_products
 RETRIEVAL_TOP_K=1
 
-# ClickHouse (optional, for FAQ indexing)
+# ClickHouse (optional, for production FAQ indexing)
 CLICKHOUSE_HOST=your-host
 CLICKHOUSE_PORT=8123
 CLICKHOUSE_DB_NAME=your_database
 ```
+
+Changing `EMBEDDING_MODEL_NAME` requires re-running all indexing scripts.
 
 ---
 
@@ -189,25 +206,22 @@ from src.core.retriever import UnifiedRetriever
 
 retriever = UnifiedRetriever()
 
-# Semantic product search (handles colloquial names)
-result = retriever.search("quick noodle original")
+# Semantic product search — returns top candidate by embedding score
+result = retriever.search("indomie goreng")
 print(f"Product: {result.metadata['official_name']}")
 print(f"SKU: {result.metadata['sku']}")
 print(f"Confidence: {result.relevance_score:.2%}")
 
-# Intent classification
-result = retriever.search(
-    "Checkout now",
-    search_products=False,
-    search_intents=True
-)
-print(f"Intent: {result.metadata['intent_name']}")
+# Get top 3 product candidates for LLM reranking
+candidates = retriever.get_product_candidates("indomie goreng", n=3)
+for c in candidates:
+    print(f"  {c.metadata['sku']}: {c.metadata['official_name']} ({c.relevance_score:.2%})")
 
-# Full RAG pipeline
+# Full RAG pipeline with reranking + function calling
 from src.core.orchestrator import UnifiedRAGOrchestrator
 
 orchestrator = UnifiedRAGOrchestrator(enable_order_tracking=True)
-response = orchestrator.process_query("I want to order 3 boxes of noodles")
+response = orchestrator.process_query("mau beli indomie goreng 2 dus")
 print(response)
 ```
 
@@ -215,18 +229,24 @@ print(response)
 
 ## Key Design Decisions
 
-**Pinned dependency versions** — ChromaDB 0.5.0 is required (1.3.4 causes segfaults on Windows
-with torch 2.8.0). `sentence-transformers==2.7.0` for the same reason with torch 2.8.0.
+**LLM reranking for product disambiguation** — Embedding similarity alone cannot reliably
+distinguish similar products (e.g. "indomie goreng" vs "indomie ayam bawang"). The retriever
+fetches the top 3 candidates and the LLM selects the correct one from a numbered list. This
+costs one extra embedding call per product query.
 
-**Hardcoded collection names** — FAQ and intent collection names (`faq_collection`,
-`intent_collection`) are constants in `retriever.py`, not env vars, to keep config minimal.
+**Cosine distance required** — All ChromaDB collections must be created with
+`metadata={"hnsw:space": "cosine"}`. The default L2 metric produces distances > 1,
+which makes `relevance_score = 1 - distance` always clamp to 0.
+
+**Pinned dependency versions** — `chromadb==0.5.0` is required (1.3.4 causes segfaults on
+Windows with torch 2.8.0). `sentence-transformers==2.7.0` for the same reason.
+
+**Hardcoded collection names** — `faq_collection` and `intent_collection` are constants in
+`retriever.py`, not env vars. Only the product collection name is configurable via `COLLECTION_NAME`.
 
 **CSV-based stock reading** — No live database connection at query time; `StockReader` reads
-`data/stock_data.csv` directly. This makes the system runnable without database access for
-demos and development.
-
-**Single best-match retrieval** — `RETRIEVAL_TOP_K=1` returns the single highest-confidence
-result across all collections, keeping LLM context tight and reducing hallucination surface.
+`data/stock_data.csv` directly, supporting multiple rows per SKU for multi-warehouse inventory.
+`src/api/inventory_api.py` is a legacy FastAPI module kept for reference only.
 
 ---
 
@@ -234,34 +254,36 @@ result across all collections, keeping LLM context tight and reducing hallucinat
 
 | Metric | Value |
 |--------|-------|
-| Embedding model | all-MiniLM-L6-v2 (384 dimensions) |
-| Total indexed items | 74+ (products + FAQs + intents) |
-| Query latency | < 500ms (retrieval + LLM) |
+| Embedding model | paraphrase-multilingual-MiniLM-L12-v2 (384 dimensions) |
+| Languages supported | Indonesian, Javanese, + 50 other languages |
+| Total indexed items | 44+ (products + FAQs + intents) |
 | Memory footprint | ~500MB with model loaded |
 | ChromaDB storage | ~2MB for full index |
 
 ---
 
-## Documentation
-
-- [`docs/INTENT_SYSTEM.md`](docs/INTENT_SYSTEM.md) — Full intent classification guide
-- [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md) — API reference
-- [`docs/FAQ_INTEGRATION.md`](docs/FAQ_INTEGRATION.md) — ClickHouse FAQ setup
-- [`deployment/DOCKER.md`](deployment/DOCKER.md) — Full Docker deployment guide
-- [`docs/QUICK_START.md`](docs/QUICK_START.md) — Condensed setup steps
-
----
-
 ## Troubleshooting
+
+**All relevance scores are 0.0000** — Collections were indexed without `hnsw:space: cosine`. Re-run all indexing scripts (they delete and recreate collections).
 
 **ChromaDB segfault on Windows** — Use `chromadb==0.5.0`, not 1.3.4.
 
-**onnxruntime DLL error (Windows)** — Install `onnxruntime==1.16.3` locally
-(excluded from `requirements.txt` for Docker compatibility).
+**onnxruntime DLL error (Windows)** — Install `onnxruntime==1.16.3` after `requirements.txt` (excluded for Docker compatibility).
 
 **Import errors** — Always run scripts from the project root, not from inside `scripts/`.
 
 **LLM connection refused** — Start your LLM server first and verify `LLM_BASE_URL` in `.env`.
+
+**`run_query.py` hangs or EOFError** — Requires an interactive TTY. Use `docker-compose exec -it rag python scripts/run_query.py`, not without `-it`.
+
+**Script changes not reflected in Docker** — `src/` and `scripts/` are baked into the image. Run `docker-compose build && docker-compose up -d` after changes.
+
+---
+
+## Documentation
+
+- [`deployment/DOCKER.md`](deployment/DOCKER.md) — Full Docker deployment guide
+- [`docs/plans/`](docs/plans/) — Implementation plan history
 
 ---
 
@@ -273,4 +295,4 @@ result across all collections, keeping LLM context tight and reducing hallucinat
 
 ---
 
-**Version**: 1.0.0 | **Status**: Production-ready
+**Version**: 1.1.0 | **Status**: Production-ready
