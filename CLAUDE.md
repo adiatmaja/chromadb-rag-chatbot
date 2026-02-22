@@ -14,8 +14,8 @@ pip install onnxruntime==1.16.3
 # Validate configuration
 python src/config.py
 
-# One-time data indexing (must be run in this order from project root)
-python scripts/indexing/parse_intent_data.py   # intent.txt → intent_data.csv
+# One-time data indexing (run from project root — do NOT run parse_intent_data.py,
+# it overwrites the hand-tuned embedding_text in intent_data.csv)
 python scripts/indexing/index_intent.py         # intent_data.csv → ChromaDB
 python scripts/indexing/index_products.py       # product_data.csv → ChromaDB
 python scripts/indexing/index_faq_csv.py        # data/faq_data.csv → ChromaDB (no-ClickHouse)
@@ -23,6 +23,9 @@ python scripts/indexing/index_faq.py            # ClickHouse → ChromaDB (produ
 
 # Verify all collections are indexed correctly
 python scripts/indexing/verify_collections.py
+
+# Comprehensive retrieval test — all 11 products, 15 FAQs, 18 intents (must be 44/44)
+PYTHONIOENCODING=utf-8 python scripts/testing/test_all_retrieval.py
 
 # Interactive query interface (requires TTY — run in your own terminal, not via CI)
 python scripts/run_query.py
@@ -33,10 +36,13 @@ docker-compose exec rag bash
 docker-compose exec -it rag python scripts/run_query.py   # interactive session
 
 # Docker indexing (after docker-compose up -d)
-docker-compose exec rag python scripts/indexing/parse_intent_data.py
+# Note: do NOT run parse_intent_data.py — intent_data.csv is git-tracked with hand-tuned embedding_text
 docker-compose exec rag python scripts/indexing/index_intent.py
 docker-compose exec rag python scripts/indexing/index_products.py
 docker-compose exec rag python scripts/indexing/index_faq_csv.py
+
+# Run comprehensive retrieval test inside Docker
+PYTHONIOENCODING=utf-8 docker exec rag-product-search python scripts/testing/test_all_retrieval.py
 
 # Rebuild Docker image (required after any changes to scripts/ or src/)
 docker-compose build && docker-compose up -d
@@ -63,7 +69,7 @@ UnifiedRetriever (src/core/retriever.py)
     │  sentence-transformers embeds query → search 3 collections
     ├──▶ fmcg_products collection   (product catalog, SKUs)
     ├──▶ faq_collection             (FAQ data)
-    └──▶ intent_collection          (35+ e-commerce intents)
+    └──▶ intent_collection          (18 e-commerce intents)
          │
          ▼  best match by relevance_score (1 - cosine_distance)
 UnifiedRAGOrchestrator (src/core/orchestrator.py)
@@ -123,9 +129,10 @@ These versions are pinned and must not be changed without compatibility testing:
 
 ## Data Files
 
-- `data/product_data.csv` — Product catalog (SKUs, official names, colloquial names, pack sizes, pre-computed `embedding_text`)
+- `data/product_data.csv` — Product catalog (SKUs, official names, colloquial names, pack sizes, pre-computed `embedding_text`). All embedding texts in Indonesian.
+- `data/intent_data.csv` — **Git-tracked** (not generated). Hand-tuned `embedding_text` column with pure Indonesian phrases for all 18 intents. **Do not re-run `parse_intent_data.py`** — it would overwrite these with untuned defaults from `intent.txt`.
 - `data/stock_data.csv` — Inventory by warehouse (columns: `sku`, `product_name`, `warehouse_id`, `warehouse_name`, `location`, `quantity`, `reserved_quantity`, `reorder_level`)
-- `data/faq_data.csv` — FAQ entries for no-ClickHouse mode
-- `data/intent.txt` — Raw intent definitions → parsed by `parse_intent_data.py` → `data/intent_data.csv`
+- `data/faq_data.csv` — FAQ entries for no-ClickHouse mode. Questions and answers in Indonesian; indexed as `"Pertanyaan: {q} Jawaban: {a}"`.
+- `data/intent.txt` — Original raw intent definitions (source for `parse_intent_data.py`). Do not use to regenerate `intent_data.csv` without manually restoring the `embedding_text` column.
 - `database/chroma_db/` — ChromaDB persistent storage (git-ignored)
 - `database/orders.json` — Persistent order tracking (git-ignored)

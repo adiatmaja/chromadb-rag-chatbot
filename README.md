@@ -31,7 +31,7 @@ backed by ChromaDB.
                              │
   ┌──────────────────────────▼───────────────────────────────┐
   │  Unified Retriever  (src/core/retriever.py)              │
-  │  paraphrase-multilingual-MiniLM-L12-v2 → embeddings     │
+  │  LazarusNLP/all-indo-e5-small-v4 → embeddings           │
   │  Parallel search across 3 ChromaDB collections          │
   └──────────┬─────────────────┬──────────────┬─────────────┘
              │                 │              │
@@ -68,11 +68,12 @@ backed by ChromaDB.
 
 ## Features
 
+- **Indonesian-specialist Embeddings** — uses `LazarusNLP/all-indo-e5-small-v4`, a fine-tuned E5 model optimised for Indonesian; embedding texts across all data files are pure Indonesian for maximum alignment
 - **Semantic Product Search** — understands colloquial and regional product names (e.g. "indomie kuning" → Indomie Mi Instan Rasa Ayam Bawang)
-- **LLM Reranking** — top 5 product candidates sent to LLM for selection, avoiding embedding model precision issues between similar products
-- **Intent Classification** — 18+ e-commerce intent types (cart ops, checkout, product inquiry, greetings)
+- **LLM Reranking** — top 5 product candidates sent to LLM for selection, resolving embedding model precision issues between similar products
+- **Intent Classification** — 18 e-commerce intent types (cart operations, checkout, product inquiry, greetings, and more)
 - **FAQ Retrieval** — vectorized FAQ queried semantically; supports ClickHouse (production) or CSV (demo)
-- **Unified Search** — single interface across all three knowledge bases, returns best match
+- **Unified Search** — single interface across all three knowledge bases, returns best match by cosine similarity
 - **LLM Integration** — works with any OpenAI-compatible API (LM Studio, OpenAI, Ollama)
 - **Function Calling** — automatic inventory check via `check_inventory(sku, qty)` when user states a quantity
 - **Order Tracking** — automatic order capture with persistent JSON storage
@@ -103,13 +104,16 @@ chromadb-rag-chatbot/
 │   │   ├── index_faq.py         # ClickHouse FAQ → ChromaDB (production)
 │   │   ├── parse_intent_data.py # intent.txt → intent_data.csv
 │   │   └── verify_collections.py
-│   └── run_query.py             # Interactive query interface (requires TTY)
+│   ├── run_query.py             # Interactive query interface (requires TTY)
+│   └── testing/
+│       └── test_all_retrieval.py  # Comprehensive retrieval test (44 cases)
 │
 ├── data/                        # Sample data (replace with your own)
 │   ├── product_data.csv         # Product catalog with pre-computed embedding_text
 │   ├── stock_data.csv           # Inventory by warehouse (multi-warehouse schema)
 │   ├── faq_data.csv             # FAQ entries for demo mode
-│   └── intent.txt               # Intent definitions + examples
+│   ├── intent_data.csv          # Intent definitions with hand-tuned Indonesian embedding_text
+│   └── intent.txt               # Raw intent source (do not regenerate intent_data.csv from this)
 │
 ├── database/                    # ChromaDB + order storage (git-ignored)
 ├── deployment/                  # Docker deployment guides and helper scripts
@@ -138,7 +142,7 @@ cp .env.example .env
 docker-compose up -d
 
 # First-time: index all data
-docker-compose exec rag python scripts/indexing/parse_intent_data.py
+# (intent_data.csv is pre-configured — skip parse_intent_data.py)
 docker-compose exec rag python scripts/indexing/index_intent.py
 docker-compose exec rag python scripts/indexing/index_products.py
 docker-compose exec rag python scripts/indexing/index_faq_csv.py
@@ -159,8 +163,7 @@ pip install onnxruntime==1.16.3
 cp .env.example .env
 # Edit .env with your LLM and embedding settings
 
-# Index data
-python scripts/indexing/parse_intent_data.py
+# Index data (intent_data.csv is pre-configured — skip parse_intent_data.py)
 python scripts/indexing/index_intent.py
 python scripts/indexing/index_products.py
 python scripts/indexing/index_faq_csv.py
@@ -181,8 +184,8 @@ LLM_BASE_URL=http://localhost:1234/v1
 LLM_MODEL_NAME=qwen2.5-7b-instruct
 LLM_API_KEY=lm-studio
 
-# Embeddings — multilingual model required for Indonesian/Javanese
-EMBEDDING_MODEL_NAME=paraphrase-multilingual-MiniLM-L12-v2
+# Embeddings — Indonesian-specialist E5 model (384-dim, ~120MB)
+EMBEDDING_MODEL_NAME=LazarusNLP/all-indo-e5-small-v4
 
 # ChromaDB
 VECTOR_DB_PATH=database/chroma_db
@@ -247,62 +250,62 @@ PYTHONIOENCODING=utf-8 docker exec rag-product-search \
 ══════════════════════════════════════════════════════════════════════
   PRODUCT RETRIEVAL  (target SKU must appear in top-5 candidates)
 ══════════════════════════════════════════════════════════════════════
-  [PASS]  Indomie Mi Goreng Original             query='indomie goreng'          rank #1  top_score=0.601
-  [PASS]  Indomie Mi Instan Ayam Bawang          query='indomie kuah'            rank #1  top_score=0.486
-  [PASS]  Mie Sedaap Goreng Original             query='mie sedap goreng'        rank #2  top_score=0.459
-  [PASS]  Le Minerale Air Mineral 600ml          query='le mineral'              rank #1  top_score=0.518
-  [PASS]  Aqua Air Mineral 600ml                 query='air aqua'                rank #1  top_score=0.663
-  [PASS]  Teh Botol Sosro Original               query='teh botol'               rank #1  top_score=0.475
-  [PASS]  Kopi Kapal Api Special Mix             query='kapal api mix'           rank #1  top_score=0.430
-  [PASS]  Gula Pasir Rose Brand 1kg              query='gula rose brand'         rank #1  top_score=0.718
-  [PASS]  Susu Kental Manis Frisian Flag Cokelat query='susu bendera cokelat'    rank #1  top_score=0.615
-  [PASS]  Pocari Sweat 500ml                     query='pocari sweat'            rank #1  top_score=0.370
-  [PASS]  Sabun Mandi Cair Lifebuoy              query='sabun lifebuoy merah'    rank #1  top_score=0.500
+  [PASS]  Indomie Mi Goreng Original             query='indomie goreng'          rank #1  top_score=0.646
+  [PASS]  Indomie Mi Instan Ayam Bawang          query='indomie kuah'            rank #1  top_score=0.598
+  [PASS]  Mie Sedaap Goreng Original             query='mie sedap goreng'        rank #2  top_score=0.556
+  [PASS]  Le Minerale Air Mineral 600ml          query='le mineral'              rank #1  top_score=0.708
+  [PASS]  Aqua Air Mineral 600ml                 query='air aqua'                rank #1  top_score=0.708
+  [PASS]  Teh Botol Sosro Original               query='teh botol'               rank #1  top_score=0.614
+  [PASS]  Kopi Kapal Api Special Mix             query='kapal api mix'           rank #1  top_score=0.680
+  [PASS]  Gula Pasir Rose Brand 1kg              query='gula rose brand'         rank #1  top_score=0.731
+  [PASS]  Susu Kental Manis Frisian Flag Cokelat query='susu bendera cokelat'    rank #1  top_score=0.555
+  [PASS]  Pocari Sweat 500ml                     query='pocari sweat'            rank #1  top_score=0.608
+  [PASS]  Sabun Mandi Cair Lifebuoy              query='sabun lifebuoy merah'    rank #1  top_score=0.775
 
   Products: 11/11 passed
 
 ══════════════════════════════════════════════════════════════════════
   FAQ RETRIEVAL  (correct FAQ id must be top-1 result)
 ══════════════════════════════════════════════════════════════════════
-  [PASS]  Cara pemesanan      query='cara melakukan pemesanan'          got_id=1   score=0.682
-  [PASS]  Minimum pemesanan   query='minimum order berapa'              got_id=2   score=0.626
-  [PASS]  Metode pembayaran   query='metode pembayaran yang tersedia'   got_id=3   score=0.732
-  [PASS]  Lama pengiriman     query='berapa hari pengiriman'            got_id=4   score=0.654
-  [PASS]  Biaya pengiriman    query='ongkos kirim gratis'               got_id=5   score=0.526
-  [PASS]  Cek stok produk     query='cara cek stok barang'              got_id=6   score=0.538
-  [PASS]  Negosiasi harga     query='harga bisa dinegosiasi'            got_id=7   score=0.749
-  [PASS]  Produk rusak        query='barang rusak saat diterima'        got_id=8   score=0.516
-  [PASS]  Produk non-katalog  query='pesan produk di luar katalog'      got_id=9   score=0.693
-  [PASS]  Mitra reseller      query='daftar jadi reseller'              got_id=10  score=0.478
-  [PASS]  Program loyalitas   query='program poin reward pelanggan'     got_id=11  score=0.724
-  [PASS]  Batalkan pesanan    query='cara batalkan pesanan'             got_id=12  score=0.682
-  [PASS]  Faktur/nota         query='minta faktur pembelian'            got_id=13  score=0.738
-  [PASS]  Produk terlaris     query='produk paling laris'               got_id=14  score=0.588
-  [PASS]  Kode promo          query='cara pakai kode promo'             got_id=15  score=0.709
+  [PASS]  Cara pemesanan      query='cara melakukan pemesanan'          got_id=1   score=0.616
+  [PASS]  Minimum pemesanan   query='minimum order berapa'              got_id=2   score=0.546
+  [PASS]  Metode pembayaran   query='metode pembayaran yang tersedia'   got_id=3   score=0.665
+  [PASS]  Lama pengiriman     query='berapa hari pengiriman'            got_id=4   score=0.756
+  [PASS]  Biaya pengiriman    query='ongkos kirim gratis'               got_id=5   score=0.612
+  [PASS]  Cek stok produk     query='cara cek stok barang'              got_id=6   score=0.692
+  [PASS]  Negosiasi harga     query='harga bisa dinegosiasi'            got_id=7   score=0.727
+  [PASS]  Produk rusak        query='barang rusak saat diterima'        got_id=8   score=0.661
+  [PASS]  Produk non-katalog  query='pesan produk di luar katalog'      got_id=9   score=0.670
+  [PASS]  Mitra reseller      query='daftar jadi reseller'              got_id=10  score=0.547
+  [PASS]  Program loyalitas   query='program poin reward pelanggan'     got_id=11  score=0.809
+  [PASS]  Batalkan pesanan    query='cara batalkan pesanan'             got_id=12  score=0.462
+  [PASS]  Faktur/nota         query='minta faktur pembelian'            got_id=13  score=0.717
+  [PASS]  Produk terlaris     query='produk paling laris'               got_id=14  score=0.573
+  [PASS]  Kode promo          query='cara pakai kode promo'             got_id=15  score=0.786
 
   FAQs: 15/15 passed
 
 ══════════════════════════════════════════════════════════════════════
   INTENT CLASSIFICATION  (correct intent must be top-1 result)
 ══════════════════════════════════════════════════════════════════════
-  [PASS]  Tambah jumlah item   query='tambah 3 lagi ke keranjang'                        score=0.408
-  [PASS]  Tambah item ke cart  query='mau pesan 2 dus indomie goreng'                    score=0.272
-  [PASS]  Pesan tanpa item     query='mau tambah ke keranjang tapi belum pilih produknya' score=0.436
-  [PASS]  Apply promo code     query='pakai kode DISC20'                                 score=0.275
-  [PASS]  Pertanyaan umum      query='jam operasional toko berapa'                       score=0.593
-  [PASS]  Lihat katalog        query='tampilkan katalog produk'                          score=0.588
-  [PASS]  Tanya produk spesifik query='ada mie goreng tidak'                             score=0.177
-  [PASS]  Batal tambah item    query='tidak jadi beli, batalkan'                         score=0.343
-  [PASS]  Batal checkout       query='batalkan checkout'                                 score=0.683
-  [PASS]  Checkout             query='checkout sekarang'                                 score=0.667
-  [PASS]  Farewell             query='terima kasih sampai jumpa'                         score=0.570
-  [PASS]  Cek produk favorit   query='cek produk favorit saya'                           score=0.740
-  [PASS]  Greeting             query='halo selamat pagi'                                 score=0.539
-  [PASS]  Tidak pakai promo    query='tidak pakai promo'                                 score=0.565
-  [PASS]  Cek poin             query='berapa poin saya sekarang'                         score=0.293
-  [PASS]  Status prioritas     query='saya pelanggan prioritas bukan'                    score=0.477
-  [PASS]  Kurangi item         query='kurangi 1 dari keranjang'                          score=0.459
-  [PASS]  Lihat keranjang      query='lihat isi keranjang saya'                          score=0.270
+  [PASS]  Tambah jumlah item   query='tambah 3 lagi ke keranjang'                         score=0.421
+  [PASS]  Tambah item ke cart  query='mau pesan 2 dus indomie goreng'                     score=0.195
+  [PASS]  Pesan tanpa item     query='mau tambah ke keranjang tapi belum pilih produknya'  score=0.443
+  [PASS]  Apply promo code     query='pakai kode DISC20'                                  score=0.719
+  [PASS]  Pertanyaan umum      query='jam operasional toko berapa'                        score=0.666
+  [PASS]  Lihat katalog        query='tampilkan katalog produk'                           score=0.791
+  [PASS]  Tanya produk spesifik query='berapa harga susu bendera'                         score=0.195
+  [PASS]  Batal tambah item    query='tidak jadi beli, batalkan'                          score=0.487
+  [PASS]  Batal checkout       query='batalkan checkout'                                  score=0.661
+  [PASS]  Checkout             query='checkout sekarang'                                  score=0.529
+  [PASS]  Farewell             query='terima kasih sampai jumpa'                          score=0.472
+  [PASS]  Cek produk favorit   query='cek produk favorit saya'                            score=0.665
+  [PASS]  Greeting             query='halo selamat pagi'                                  score=0.479
+  [PASS]  Tidak pakai promo    query='tidak pakai promo'                                  score=0.593
+  [PASS]  Cek poin             query='berapa poin saya sekarang'                          score=0.529
+  [PASS]  Status prioritas     query='saya pelanggan prioritas bukan'                     score=0.648
+  [PASS]  Kurangi item         query='kurangi 1 dari keranjang'                           score=0.682
+  [PASS]  Lihat keranjang      query='lihat isi keranjang saya'                           score=0.595
 
   Intents: 18/18 passed
 
@@ -321,12 +324,21 @@ PYTHONIOENCODING=utf-8 docker exec rag-product-search \
 
 ## Key Design Decisions
 
+**Indonesian-specialist embedding model** — `LazarusNLP/all-indo-e5-small-v4` is a fine-tuned
+E5 model trained specifically on Indonesian text (~33M params, ~120MB). Chosen over multilingual
+alternatives (`paraphrase-multilingual-MiniLM-L12-v2`) because all data is in Indonesian.
+E5 models require instruction prefixes: `"query: "` prepended to search queries at retrieval
+time, `"passage: "` prepended to documents at index time. Both are applied automatically based
+on `"e5" in EMBEDDING_MODEL_NAME`. Embedding texts in all data files are pure Indonesian to
+maximise alignment — removing English boilerplate raised most intent classification scores by
+0.1–0.24.
+
 **LLM reranking for product disambiguation** — Embedding similarity alone cannot reliably
 distinguish similar products (e.g. "indomie goreng" vs "indomie ayam bawang"). The retriever
 fetches the top 5 candidates and the LLM selects the correct one from a numbered list. n=5
-(not 3) is intentional: `paraphrase-multilingual-MiniLM-L12-v2` places semantically similar
-Indonesian products close together in embedding space, so the correct product can sit at rank
-3–5. This costs one extra embedding call per product query.
+(not 3) is intentional: the E5 model places semantically similar FMCG products close together
+in embedding space, so the correct product can sit at rank 3–5. This costs one extra embedding
+call per product query.
 
 **Cosine distance required** — All ChromaDB collections must be created with
 `metadata={"hnsw:space": "cosine"}`. The default L2 metric produces distances > 1,
@@ -348,10 +360,12 @@ Windows with torch 2.8.0). `sentence-transformers==2.7.0` for the same reason.
 
 | Metric | Value |
 |--------|-------|
-| Embedding model | paraphrase-multilingual-MiniLM-L12-v2 (384 dimensions) |
-| Languages supported | Indonesian, Javanese, + 50 other languages |
-| Total indexed items | 44+ (products + FAQs + intents) |
-| Memory footprint | ~500MB with model loaded |
+| Embedding model | LazarusNLP/all-indo-e5-small-v4 (384 dimensions, ~33M params) |
+| Model size | ~120MB (vs ~470MB for paraphrase-multilingual-MiniLM-L12-v2) |
+| Language | Indonesian (specialist model, all data in Indonesian) |
+| Total indexed items | 44 (11 products + 15 FAQs + 18 intents) |
+| Retrieval accuracy | 44/44 (100%) on comprehensive test suite |
+| Memory footprint | ~200MB with model loaded |
 | ChromaDB storage | ~2MB for full index |
 
 ---
@@ -389,4 +403,4 @@ Windows with torch 2.8.0). `sentence-transformers==2.7.0` for the same reason.
 
 ---
 
-**Version**: 1.1.0 | **Status**: Production-ready
+**Version**: 1.2.0 | **Status**: Production-ready
