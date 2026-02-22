@@ -49,7 +49,7 @@ def load_faq_csv(path: str) -> pd.DataFrame:
 def prepare_faq_data(df: pd.DataFrame):
     ids, documents, metadatas = [], [], []
     for _, row in df.iterrows():
-        embedding_text = f"Question: {row['question']} Answer: {row['answer']}"
+        embedding_text = f"Pertanyaan: {row['question']} Jawaban: {row['answer']}"
         ids.append(f"faq_{row['id']}")
         documents.append(embedding_text)
         metadata = {
