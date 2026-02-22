@@ -76,7 +76,7 @@ INTENT_TESTS = [
     ("pakai kode DISC20",                       "apply_promo_code",                         "Apply promo code"),
     ("jam operasional toko berapa",             "asking_general_questions",                 "Pertanyaan umum"),
     ("tampilkan katalog produk",                "asking_priority_products",                 "Lihat katalog"),
-    ("ada mie goreng tidak",                    "asking_specific_product",                  "Tanya produk spesifik"),
+    ("berapa harga susu bendera",                "asking_specific_product",                  "Tanya produk spesifik"),
     ("tidak jadi beli, batalkan",               "cancel_adding_item_to_cart",               "Batal tambah item"),
     ("batalkan checkout",                       "cancel_checkout",                          "Batal checkout"),
     ("checkout sekarang",                       "checkout",                                 "Checkout"),

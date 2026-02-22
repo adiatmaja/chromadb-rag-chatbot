@@ -86,7 +86,7 @@ UnifiedRAGOrchestrator (src/core/orchestrator.py)
 
 **Key design choices:**
 - **ChromaDB collection names**: `fmcg_products` (from `COLLECTION_NAME` env var), `faq_collection` and `intent_collection` are hardcoded constants in `retriever.py` — not env vars.
-- **Product reranking**: For PRODUCT matches, `get_product_candidates()` runs a second embedding lookup to fetch the top 5 products, which are sent to the LLM as a numbered list. The LLM selects the correct product — this handles cases where embedding similarity alone picks the wrong variant (e.g., "indomie goreng" vs "indomie ayam bawang"). n=5 (not 3) is intentional: the `paraphrase-multilingual-MiniLM-L12-v2` model places semantically similar Indonesian products close together, so the correct product may sit at rank 3–5. This means two embedding calls per product query.
+- **Product reranking**: For PRODUCT matches, `get_product_candidates()` runs a second embedding lookup to fetch the top 5 products, which are sent to the LLM as a numbered list. The LLM selects the correct product — this handles cases where embedding similarity alone picks the wrong variant (e.g., "indomie goreng" vs "indomie ayam bawang"). n=5 (not 3) is intentional: the Indonesian embedding model places semantically similar products close together, so the correct product may sit at rank 3–5. This means two embedding calls per product query.
 - **Stock data**: Read directly from `data/stock_data.csv` via `StockReader`. Schema requires: `sku`, `product_name`, `warehouse_id`, `warehouse_name`, `location`, `quantity`, `reserved_quantity`, `reorder_level`. Supports multiple rows per SKU (multi-warehouse). The `src/api/inventory_api.py` is a legacy FastAPI module not used in the current flow.
 - **Cosine distance**: All ChromaDB collections must be created with `metadata={"hnsw:space": "cosine"}`. Default L2 distance makes `relevance_score = 1 - distance` always return 0 for typical embedding distances.
 - **Order tracking**: `OrderTracker` persists orders to `database/orders.json` as a flat list of `OrderData` dataclasses.
@@ -99,13 +99,15 @@ All config lives in `.env` (copy from `.env.example`). Config is loaded centrall
 ```env
 LLM_BASE_URL=http://localhost:1234/v1              # Any OpenAI-compatible endpoint
 LLM_MODEL_NAME=qwen2.5-7b-instruct               # Must match name shown in LM Studio
-EMBEDDING_MODEL_NAME=paraphrase-multilingual-MiniLM-L12-v2  # Best for Indonesian/Javanese
+EMBEDDING_MODEL_NAME=LazarusNLP/all-indo-e5-small-v4  # Indonesian-specialist, ~120MB, 384-dim
 COLLECTION_NAME=fmcg_products
 VECTOR_DB_PATH=database/chroma_db
 RETRIEVAL_TOP_K=1
 ```
 
 Changing `EMBEDDING_MODEL_NAME` requires full re-indexing of all three collections.
+
+**E5 prefix convention**: Models with `"e5"` in their name (e.g. `LazarusNLP/all-indo-e5-small-v4`) require `"query: "` prepended to query texts at retrieval time and `"passage: "` prepended to documents at index time. This is handled automatically by `retriever.py` (`_encode_query()`) and the three indexing scripts.
 
 ## Dependency Constraints
 

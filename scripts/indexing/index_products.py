@@ -79,6 +79,8 @@ print(f"Prepared {len(ids)} product records")
 
 # Generate embeddings
 print("\nGenerating embeddings...")
+if "e5" in EMBEDDING_MODEL_NAME.lower():
+    documents = [f"passage: {doc}" for doc in documents]
 embeddings = model.encode(documents, show_progress_bar=False)
 print(f"Generated embeddings: {embeddings.shape}")
 

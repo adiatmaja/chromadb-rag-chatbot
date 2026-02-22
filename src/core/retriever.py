@@ -188,6 +188,16 @@ class UnifiedRetriever:
 
         console.print("[green]✅ Unified Retriever ready![/green]")
 
+    def _encode_query(self, query: str) -> list:
+        """Encode a query, applying the E5 'query: ' prefix when needed.
+
+        E5-family models (intfloat/*, LazarusNLP/all-indo-e5-*) require
+        'query: ' prepended at inference time and 'passage: ' at index time.
+        Non-E5 models (paraphrase-*, all-MiniLM-*) use the raw text.
+        """
+        text = f"query: {query}" if "e5" in EMBEDDING_MODEL_NAME.lower() else query
+        return self.embedding_model.encode([text]).tolist()
+
     def search(
             self,
             query: str,
@@ -219,7 +229,7 @@ class UnifiedRetriever:
         console.print(f"\n[bold yellow]🔍 Search Query:[/bold yellow] {query}")
 
         # Generate query embedding
-        query_embedding = self.embedding_model.encode([query]).tolist()
+        query_embedding = self._encode_query(query)
 
         # Collect results from all collections
         all_results = []
@@ -292,7 +302,7 @@ class UnifiedRetriever:
 
         console.print(f"\n[bold yellow]🔍 Search Query (All Results):[/bold yellow] {query}")
 
-        query_embedding = self.embedding_model.encode([query]).tolist()
+        query_embedding = self._encode_query(query)
         all_results = []
 
         # Search products
@@ -357,7 +367,7 @@ class UnifiedRetriever:
         if count == 0:
             return []
 
-        query_embedding = self.embedding_model.encode([query]).tolist()
+        query_embedding = self._encode_query(query)
         candidates = self._search_collection(
             self.product_collection,
             query_embedding,

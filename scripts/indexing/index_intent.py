@@ -180,6 +180,8 @@ def index_intent_data():
             task = progress.add_task("[cyan]Processing...", total=2)
 
             # Generate embeddings
+            if "e5" in EMBEDDING_MODEL_NAME.lower():
+                documents = [f"passage: {doc}" for doc in documents]
             embeddings = model.encode(documents, show_progress_bar=False)
             progress.update(task, advance=1)
 
